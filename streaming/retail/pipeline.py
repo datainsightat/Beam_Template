@@ -59,7 +59,9 @@ def run():
         # | "Window Fixed" >> beam.WindowInto(window.FixedWindows(20))
         # | "Window Sliding" >> beam.WindowInto(window.SlidingWindows(30,10))
         # | "Window Session" >> beam.WindowInto(window.Sessions(25))
-        | "Window Global" >> beam.WindowInto(window.GlobalWindows(), trigger=Repeatedly(AfterCount(5)), accumulation_mode=AccumulationMode.DISCARDING)
+        # | "Window Global" >> beam.WindowInto(window.GlobalWindows(), trigger=Repeatedly(AfterCount(5)), accumulation_mode=AccumulationMode.DISCARDING)
+        # | "Window Fixed AfterProcessingTrigger" >> beam.WindowInto(window.FixedWindows(20), trigger=AfterProcessingTime(10), accumulation_mode=AccumulationMode.DISCARDING) #ACCUMULATING
+        | "Window Fixed AfterWatermark" >> beam.WindowInto(window.FixedWindows(20), trigger=AfterWatermark(early=AfterProcessingTime(5),late=AfterCount(5)))#, accumulation_mode=AccumulationMode.DISCARDING) #ACCUMULATING
         | "Sum values" >> beam.CombinePerKey(sum)
         | "Encode to byte string" >> beam.Map(encode_byte_string)
         | "Write to pub sub" >> beam.io.WriteToPubSub(output_topic)
